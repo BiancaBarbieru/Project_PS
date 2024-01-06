@@ -1,0 +1,3 @@
+denoising per levels nu e nevoie
+
+trebuie sa mai fac bilateral filter
