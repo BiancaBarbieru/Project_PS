@@ -1,8 +1,7 @@
 import cv2
 import numpy as np
 from build_laplacian_pyramid import build_laplacian_pyramid
-from denoising_per_levels import denoising_per_levels
-from scipy.ndimage import zoom
+from pseudo_cross_bilateral_filter import pseudo_cross_bilateral_filter
 
 
 def reconstruct_from_laplacian_pyramid(laplacian_pyramid):
@@ -29,15 +28,32 @@ def reconstruct_from_laplacian_pyramid(laplacian_pyramid):
     return np.uint8(reconstructed_image)
 
 
-original_img = cv2.imread('./Noised_Lena_BW.jpg', cv2.IMREAD_GRAYSCALE)
+# Read the noised and wiener images
+noised_img = cv2.imread('./Noised_Lena_BW.jpg', cv2.IMREAD_GRAYSCALE)
+wiener_filtered_img = cv2.imread('./Wiener_Filter_Over_Noised_Lena.jpg', cv2.IMREAD_GRAYSCALE)
 
+# Specify the number of levels in the Laplacian pyramid
 no_levels = 20
 
-laplacian_pyramid = build_laplacian_pyramid(original_img, no_levels)
-filtered_pyramid = [denoising_per_levels(level) for level in laplacian_pyramid]
+# Build the Laplacian pyramid for the noised image
+laplacian_pyramid_noised = build_laplacian_pyramid(noised_img, no_levels)
+
+# Build the Laplacian pyramid for the wiener filtered image
+laplacian_pyramid_wiener = build_laplacian_pyramid(wiener_filtered_img, no_levels)
+
+# Apply the pseudo cross bilateral filter
+sigma_spatial = 2.0
+sigma_range = 20.0
+filtered_pyramid = [pseudo_cross_bilateral_filter(level_noised, level_wiener, sigma_spatial, sigma_range)
+                    for level_noised, level_wiener in zip(laplacian_pyramid_noised, laplacian_pyramid_wiener)]
+
+# Reconstruct the final image from the pyramid layers after the pseudo cross bilateral filter
 reconstructed_image = reconstruct_from_laplacian_pyramid(filtered_pyramid)
 
+# Display and save the final image
 cv2.imshow('Reconstructed Image', reconstructed_image)
-cv2.imwrite('./reconstructed_image.png', reconstructed_image)
+cv2.imwrite('./Reconstructed_Image.jpg', reconstructed_image)
 cv2.waitKey(0)
+
+# Close all windows
 cv2.destroyAllWindows()
