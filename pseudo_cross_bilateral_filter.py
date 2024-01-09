@@ -14,22 +14,15 @@ def pseudo_cross_bilateral_filter(img1, img2, sigma_spatial, sigma_range):
             # Intensity difference
             intensity_diff = np.abs(img1[y, x] - img2[y, x])
 
-            # Scale the intensity differences to avoid overflow
-            intensity_diff_scaled = intensity_diff / max(sigma_range, 1e-6)
-
             # Range weight
-            range_weight = np.exp(-np.sum(intensity_diff_scaled ** 2) / 2)
+            range_weight = np.exp(-np.clip(intensity_diff / (2 * sigma_range ** 2), -700, 700))
 
             # Combined weight (normalize to ensure weights sum up to 1.0)
             total_weight = spatial_weight + range_weight
-            combined_weight = range_weight / total_weight  # Adjusted normalization
+            combined_weight = range_weight / total_weight
 
-            # Apply the weight to each channel without a global scaling factor
-            filtered_intensity = combined_weight * img1[y, x] + (1 - combined_weight) * img2[y, x]
-
-            # Adjust the intensity based on the difference between input and filtered images
-            intensity_adjustment = filtered_intensity - img2[y, x]
-            filtered_img[y, x] = img2[y, x] + intensity_adjustment
+            # Apply the weight to each channel of the second image
+            filtered_img[y, x] = combined_weight * img2[y, x] + (1 - combined_weight) * img1[y, x]
 
     return filtered_img.astype(np.uint8)
 
