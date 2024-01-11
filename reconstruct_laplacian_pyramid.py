@@ -2,6 +2,8 @@ import cv2
 import numpy as np
 from build_laplacian_pyramid import build_laplacian_pyramid
 from pseudo_cross_bilateral_filter import pseudo_cross_bilateral_filter
+from wiener_filter import adaptive_wiener_filter
+from add_noise import add_noise
 
 
 def reconstruct_from_laplacian_pyramid(laplacian_pyramid):
@@ -29,11 +31,12 @@ def reconstruct_from_laplacian_pyramid(laplacian_pyramid):
 
 
 # Read the noised and wiener images
-noised_img = cv2.imread('./Noised_Lena_BW.jpg', cv2.IMREAD_GRAYSCALE)
-wiener_filtered_img = cv2.imread('./Wiener_Filter_Over_Noised_Lena.jpg', cv2.IMREAD_GRAYSCALE)
+original_img = cv2.imread('./Lena_BW.jpg', cv2.IMREAD_GRAYSCALE)
+noised_img = add_noise(original_img)
+wiener_filtered_img = adaptive_wiener_filter(noised_img)
 
 # Specify the number of levels in the Laplacian pyramid
-no_levels = 20
+no_levels = 4
 
 # Build the Laplacian pyramid for the noised image
 laplacian_pyramid_noised = build_laplacian_pyramid(noised_img, no_levels)

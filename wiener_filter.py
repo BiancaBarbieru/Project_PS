@@ -1,7 +1,7 @@
 import numpy as np
-from scipy.fftpack import fft2, ifft2
-from scipy.ndimage import convolve
+from scipy.signal import wiener
 import cv2
+from add_noise import add_noise
 
 
 def adaptive_wiener_filter(image, block_size=5):
@@ -28,11 +28,12 @@ def adaptive_wiener_filter(image, block_size=5):
 
 
 # Creating the filtered image from the noised one
-observed_image = cv2.imread('./Noised_Lena_BW.jpg', cv2.IMREAD_GRAYSCALE)
-filtered_image_adaptive = adaptive_wiener_filter(observed_image)
+original_image = cv2.imread('./Lena_BW.jpg', cv2.IMREAD_GRAYSCALE)
+noised_img = add_noise(original_image)
+filtered_image_adaptive = adaptive_wiener_filter(noised_img)
 
 # Display and save the filtered image
-cv2.imshow('Adaptive Wiener Filtered Image', filtered_image_adaptive)
+# cv2.imshow('Adaptive Wiener Filtered Image', filtered_image_adaptive)
 cv2.imwrite('Wiener_Filter_Over_Noised_Lena.jpg', filtered_image_adaptive)
 cv2.waitKey(0)
 

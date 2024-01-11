@@ -1,4 +1,6 @@
 import cv2
+from wiener_filter import adaptive_wiener_filter
+from add_noise import add_noise
 
 
 def build_laplacian_pyramid(img, levels):
@@ -25,13 +27,14 @@ def build_laplacian_pyramid(img, levels):
 
 
 # Read the original noised image
-original_img = cv2.imread('./Noised_Lena_BW.jpg', cv2.IMREAD_GRAYSCALE)
+original_img = cv2.imread('./Lena_BW.jpg', cv2.IMREAD_GRAYSCALE)
+noised_img = add_noise(original_img)
 
 # Specify the number of levels in the Laplacian pyramid
 no_levels = 4
 
 # Build the Laplacian pyramid
-pyramid = build_laplacian_pyramid(original_img, no_levels)
+pyramid = build_laplacian_pyramid(noised_img, no_levels)
 
 # Save each level of the Laplacian pyramid as an individual image
 for i, level in enumerate(pyramid):
@@ -40,10 +43,10 @@ cv2.waitKey(0)
 
 
 # Same for decomposing the image filtered with wiener just to save the steps
-original_img = cv2.imread('./Wiener_Filter_Over_Noised_Lena.jpg', cv2.IMREAD_GRAYSCALE)
+original_img_wiener = adaptive_wiener_filter(noised_img)
 no_levels = 4
-pyramid = build_laplacian_pyramid(original_img, no_levels)
-for i, level in enumerate(pyramid):
+pyramid_wiener = build_laplacian_pyramid(original_img_wiener, no_levels)
+for i, level in enumerate(pyramid_wiener):
     cv2.imwrite(f'./laplacian_levels_wiener/level_{i}.png', level)
 cv2.waitKey(0)
 
