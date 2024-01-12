@@ -36,7 +36,7 @@ noised_img = add_noise(original_img)
 wiener_filtered_img = adaptive_wiener_filter(noised_img)
 
 # Specify the number of levels in the Laplacian pyramid
-no_levels = 4
+no_levels = 20
 
 # Build the Laplacian pyramid for the noised image
 laplacian_pyramid_noised = build_laplacian_pyramid(noised_img, no_levels)
